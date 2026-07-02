@@ -3,18 +3,25 @@ import socket from '../services/socket'
 
 const API_URL = 'http://localhost:5000/api'
 
+let isSocketSetup = false // Module-level flag
+
 export function useChat(username) {
   const [messages, setMessages] = useState([])
   const [onlineUsers, setOnlineUsers] = useState([])
   const [typingUsers, setTypingUsers] = useState([])
-  const [isConnected, setIsConnected] = useState(false)
+  const [isConnected, setIsConnected] = useState(socket.connected)
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
   const usernameRef = useRef(username)
-  const currentRoomRef = useRef(null)
+  const messagesRef = useRef([])
 
+  // Keep refs in sync
   useEffect(() => {
     usernameRef.current = username
   }, [username])
+
+  useEffect(() => {
+    messagesRef.current = messages
+  }, [messages])
 
   const loadMessageHistory = useCallback(async (roomName) => {
     if (!roomName) return
@@ -22,17 +29,15 @@ export function useChat(username) {
     try {
       const response = await fetch(`${API_URL}/messages/${roomName}`)
       const data = await response.json()
-      
       const historyMessages = data.messages.map((msg) => ({
         ...msg,
         room: msg.roomName || roomName,
         roomId: msg.roomId || roomName,
-        isOwn: msg.sender?.username === usernameRef.current || msg.sender === usernameRef.current,
+        isOwn: msg.sender?.username === usernameRef.current,
       }))
-      
       setMessages((prev) => {
         const otherMessages = prev.filter((m) => {
-          const msgRoom = m.room?.name || m.room || m.roomId || m.roomName || ''
+          const msgRoom = m.room || m.roomId || m.roomName || ''
           return msgRoom !== roomName
         })
         return [...otherMessages, ...historyMessages]
@@ -44,33 +49,37 @@ export function useChat(username) {
     }
   }, [])
 
+  // Set up socket listeners ONCE
   useEffect(() => {
+    if (isSocketSetup) return
+    isSocketSetup = true
+
     if (!socket.connected) {
       socket.connect()
     }
 
     const onConnect = () => {
+      console.log('✅ Connected:', usernameRef.current)
       setIsConnected(true)
-      socket.emit('user-online', { username: usernameRef.current })
-      if (currentRoomRef.current) {
-        loadMessageHistory(currentRoomRef.current)
+      if (usernameRef.current) {
+        socket.emit('user-online', { username: usernameRef.current })
       }
     }
 
-    const onDisconnect = () => setIsConnected(false)
+    const onDisconnect = () => {
+      setIsConnected(false)
+    }
 
     const onNewMessage = (message) => {
-      setMessages((prev) => {
-        const exists = prev.find((m) => m._id === message._id)
-        if (exists) return prev
-        const msgRoom = message.room?.name || message.room || message.roomId || message.roomName || ''
-        return [...prev, { 
-          ...message, 
-          room: msgRoom,
-          roomId: msgRoom,
-          isOwn: message.sender?.username === usernameRef.current || message.sender === usernameRef.current 
-        }]
-      })
+      const currentMessages = messagesRef.current
+      const exists = currentMessages.find((m) => m._id === message._id)
+      if (exists) return
+
+      console.log('📩 New message:', message.text)
+      setMessages((prev) => [...prev, {
+        ...message,
+        isOwn: message.sender?.username === usernameRef.current,
+      }])
     }
 
     const onOnlineUsers = (users) => setOnlineUsers(users)
@@ -89,25 +98,32 @@ export function useChat(username) {
     socket.on('online-users', onOnlineUsers)
     socket.on('user-typing', onUserTyping)
 
+    // Trigger if already connected
+    if (socket.connected && usernameRef.current) {
+      socket.emit('user-online', { username: usernameRef.current })
+    }
+
     return () => {
       socket.off('connect', onConnect)
       socket.off('disconnect', onDisconnect)
       socket.off('new-message', onNewMessage)
       socket.off('online-users', onOnlineUsers)
       socket.off('user-typing', onUserTyping)
+      isSocketSetup = false
     }
-  }, [loadMessageHistory])
+  }, [])
 
   const sendMessage = useCallback((text, roomId) => {
     socket.emit('send-message', { roomId, text })
   }, [])
 
-  const startTyping = useCallback((roomId) => {
-    socket.emit('typing-start', { roomId, username: usernameRef.current })
-  }, [])
+  const joinRoom = useCallback((roomId) => {
+    socket.emit('join-room', { roomId })
+    loadMessageHistory(roomId)
+  }, [loadMessageHistory])
 
-  const stopTyping = useCallback((roomId) => {
-    socket.emit('typing-stop', { roomId, username: usernameRef.current })
+  const leaveRoom = useCallback((roomId) => {
+    socket.emit('leave-room', { roomId })
   }, [])
 
   const markAsRead = useCallback((messageId) => {
@@ -118,14 +134,12 @@ export function useChat(username) {
     socket.emit('add-reaction', { messageId, emoji })
   }, [])
 
-  const joinRoom = useCallback((roomId) => {
-    currentRoomRef.current = roomId
-    socket.emit('join-room', { roomId })
-    loadMessageHistory(roomId)
-  }, [loadMessageHistory])
+  const startTyping = useCallback((roomId) => {
+    socket.emit('typing-start', { roomId, username: usernameRef.current })
+  }, [])
 
-  const leaveRoom = useCallback((roomId) => {
-    socket.emit('leave-room', { roomId })
+  const stopTyping = useCallback((roomId) => {
+    socket.emit('typing-stop', { roomId, username: usernameRef.current })
   }, [])
 
   return {

@@ -18,15 +18,15 @@ module.exports = (io, socket) => {
   socket.on('send-message', async (data) => {
     try {
       const { roomId, text } = data;
+      console.log('📩 Received message request:', { roomId, text });
 
-      // Find the actual user by socket ID
       const user = await User.findOne({ socketId: socket.id });
       if (!user) {
-        socket.emit('message-error', { error: 'User not found. Please rejoin.' });
+        console.log('❌ User not found for socket:', socket.id);
+        socket.emit('message-error', { error: 'User not found' });
         return;
       }
 
-      // Find or create the room
       let room = await Room.findOne({ name: roomId.toLowerCase() });
       if (!room) {
         room = await Room.create({
@@ -34,27 +34,36 @@ module.exports = (io, socket) => {
           createdBy: user._id,
           members: [user._id],
         });
+        console.log('📁 Created new room:', room.name);
       }
 
-      // Create the message
       const message = await Message.create({
         sender: user._id,
         room: room._id,
         text: text,
       });
 
-      // Populate sender info
       const populatedMessage = await Message.findById(message._id)
         .populate('sender', 'username')
-        .populate('room','name')
-        .populate('reactions.user', 'username');
+        .populate('room', 'name');
 
-      console.log('Message saved:', populatedMessage.text);
+      const messageToSend = {
+        _id: populatedMessage._id,
+        text: populatedMessage.text,
+        sender: populatedMessage.sender,
+        room: room.name,
+        roomName: room.name,
+        roomId: room._id,
+        createdAt: populatedMessage.createdAt,
+        reactions: [],
+        readBy: [],
+        isPrivate: false,
+      };
 
-      // Send to all in room
-      io.to(roomId).emit('new-message', populatedMessage);
+      console.log('📤 Emitting message to room:', roomId, messageToSend);
+      io.to(roomId).emit('new-message', messageToSend);
     } catch (error) {
-      console.error('Message error:', error);
+      console.error('❌ Send message error:', error);
       socket.emit('message-error', { error: error.message });
     }
   });
@@ -71,18 +80,13 @@ module.exports = (io, socket) => {
     try {
       const user = await User.findOne({ socketId: socket.id });
       if (!user) return;
-
       const message = await Message.findByIdAndUpdate(
         messageId,
         { $addToSet: { readBy: user._id } },
         { new: true }
       );
       if (message) {
-        io.to(message.room.toString()).emit('message-read', {
-          messageId,
-          userId: user._id,
-          readBy: message.readBy,
-        });
+        io.to(message.room.toString()).emit('message-read', { messageId, userId: user._id, readBy: message.readBy });
       }
     } catch (error) {
       socket.emit('error', { error: error.message });
@@ -93,18 +97,13 @@ module.exports = (io, socket) => {
     try {
       const user = await User.findOne({ socketId: socket.id });
       if (!user) return;
-
       const message = await Message.findByIdAndUpdate(
         messageId,
         { $push: { reactions: { user: user._id, emoji } } },
         { new: true }
       ).populate('reactions.user', 'username');
-
       if (message) {
-        io.to(message.room.toString()).emit('message-reaction', {
-          messageId,
-          reactions: message.reactions,
-        });
+        io.to(message.room.toString()).emit('message-reaction', { messageId, reactions: message.reactions });
       }
     } catch (error) {
       socket.emit('error', { error: error.message });

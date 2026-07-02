@@ -36,16 +36,15 @@ function MessageBubble({ message, onReaction, onRead }) {
               {message.sender}
             </p>
           )}
-
-          <div
-            className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm transition-all duration-200 ${
-              message.isOwn
-                ? 'bg-gradient-to-br from-chamber-400 to-chamber-500 text-white rounded-br-md shadow-chamber-200/50'
-                : 'bg-white text-chamber-800 rounded-bl-md border border-chamber-100 shadow-chamber-100/50'
-            } ${isHovered ? 'shadow-md' : ''}`}
-          >
-            <p className="whitespace-pre-wrap break-words">{message.text}</p>
-          </div>
+<div
+  className={`px-5 py-3 rounded-lg rounded-br-md text-md leading-relaxed shadow-sm transition-all duration-200 ${
+    message.isOwn
+      ? 'bg-gradient-to-br from-chamber-400 to-chamber-500 text-white rounded-br-md shadow-chamber-200/50'
+      : 'bg-white text-slate-800 rounded-bl-md border border-chamber-100 shadow-chamber-100/50'
+  } ${isHovered ? 'shadow-lg' : ''}`}
+>
+  <p className="whitespace-pre-wrap break-words pl-1">{message.text}</p>
+</div>
 
           {/* Timestamp & Read receipt */}
           <div className={`flex items-center gap-2 mt-0.5 ${message.isOwn ? 'justify-end mr-1' : 'justify-start ml-1'}`}>
