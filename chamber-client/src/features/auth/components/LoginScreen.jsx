@@ -13,8 +13,8 @@ function LoginScreen({ onLogin }) {
       setError('Name must be at least 2 characters')
       return
     }
-    if (trimmed.length > 20) {
-      setError('Name must be 20 characters or less')
+    if (trimmed.length > 30) {
+      setError('Name must be 30 characters or less')
       return
     }
     setError('')

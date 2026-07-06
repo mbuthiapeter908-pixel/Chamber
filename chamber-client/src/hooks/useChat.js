@@ -82,7 +82,9 @@ export function useChat(username) {
       }])
     }
 
-    const onOnlineUsers = (users) => setOnlineUsers(users)
+    const onOnlineUsers = (users) => {
+      setOnlineUsers(users)
+    }
 
     const onUserTyping = ({ username: typingUser, isTyping }) => {
       if (isTyping) {
