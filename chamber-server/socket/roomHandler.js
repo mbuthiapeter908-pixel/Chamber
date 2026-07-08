@@ -48,4 +48,31 @@ module.exports = (io, socket) => {
       socket.emit('room-error', { error: error.message });
     }
   });
+  socket.on('get-dm-rooms', async () => {
+    try {
+      const user = await User.findOne({ socketId: socket.id });
+      if (!user) return;
+
+      const dmRooms = await Room.find({
+        members: user._id,
+        isPrivate: true,
+      }).populate('members', 'username');
+
+      const formattedRooms = dmRooms.map((room) => {
+        const otherUser = room.members.find(
+          (m) => m._id.toString() !== user._id.toString()
+        );
+        return {
+          name: room.name,
+          displayName: otherUser?.username || 'Unknown',
+          isPrivate: true,
+          id: room._id,
+        };
+      });
+
+      socket.emit('dm-rooms-list', formattedRooms);
+    } catch (error) {
+      console.error('Error fetching DM rooms:', error);
+    }
+  });
 };

@@ -3,7 +3,7 @@ import MessageBubble from './MessageBubble'
 import MessageInput from './MessageInput'
 import { useChat } from '../../../hooks/useChat'
 
-function ChatArea({ username, activeRoom }) {
+function ChatArea({ username, activeRoom,dmRooms = [] }) {
   const {
     messages,
     typingUsers,
@@ -53,7 +53,24 @@ function ChatArea({ username, activeRoom }) {
               <span className="text-white font-bold text-lg">{activeRoom.charAt(0).toUpperCase()}</span>
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-chamber-800 capitalize">{activeRoom}</h2>
+              
+        <h2 className="text-lg font-semibold text-slate-800">
+  {(() => {
+    const dmRoom = dmRooms?.find(r => r.name === activeRoom);
+    if (dmRoom) {
+      return (
+        <span className="flex items-center gap-2">
+          <span className="w-7 h-7 bg-gradient-to-br from-violet-400 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+            {dmRoom.displayName?.[0]?.toUpperCase()}
+          </span>
+          @{dmRoom.displayName}
+        </span>
+      );
+    }
+    return `# ${activeRoom}`;
+  })()}
+</h2>
+       
               <div className="flex items-center gap-2 mt-0.5">
                 <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'}`}></div>
                 <span className="text-xs text-chamber-400 font-medium">

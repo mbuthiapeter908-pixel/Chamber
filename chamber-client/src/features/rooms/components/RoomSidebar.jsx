@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
 import socket from '../../../services/socket'
 
-function RoomSidebar({ activeRoom, onRoomChange }) {
+
+
+function RoomSidebar({ activeRoom, onRoomChange , dmRooms =  [] }) {
   const [rooms, setRooms] = useState([
     { name: 'general', unread: 0 },
     { name: 'random', unread: 0 },
@@ -156,6 +158,36 @@ function RoomSidebar({ activeRoom, onRoomChange }) {
               )}
             </button>
           ))}
+          
+        {/* Direct Messages Section */}
+{dmRooms && dmRooms.length > 0 && (
+  <>
+    <div className="pt-4 pb-1.5 px-2">
+      <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+        Direct Messages
+      </h3>
+    </div>
+    {dmRooms.map((room) => (
+      <button
+        key={room.name}
+        onClick={() => onRoomChange(room.name)}
+        className={`w-full text-left px-3 py-2 rounded-xl transition-all duration-200 flex items-center gap-2.5 group ${
+          activeRoom === room.name
+            ? 'bg-gradient-to-r from-violet-50 to-purple-50 text-violet-700 font-semibold border border-violet-200/50 shadow-sm'
+            : 'text-slate-600 hover:bg-slate-50 border border-transparent'
+        }`}
+      >
+        <div className="w-7 h-7 bg-gradient-to-br from-violet-400 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
+          <span className="text-xs font-bold text-white">
+            {room.displayName?.[0]?.toUpperCase()}
+          </span>
+        </div>
+        <span className="text-sm truncate">{room.displayName}</span>
+        <div className="w-2 h-2 bg-emerald-400 rounded-full flex-shrink-0 ml-auto"></div>
+      </button>
+    ))}
+  </>
+)}
         </nav>
 
         {/* Create Room Button */}

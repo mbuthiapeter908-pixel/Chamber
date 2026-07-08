@@ -13,7 +13,7 @@ function LoginScreen({ onLogin }) {
       setError('Name must be at least 2 characters')
       return
     }
-    if (trimmed.length > 30) {
+    if (trimmed.length > 40) {
       setError('Name must be 30 characters or less')
       return
     }
@@ -24,7 +24,7 @@ function LoginScreen({ onLogin }) {
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 via-chamber-50 to-sky-50 flex items-center justify-center p-4">
       {/* Subtle background pattern */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwZWE1ZTkiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PGNpcmNsZSBjeD0iNDAiIGN5PSI0MCIgcj0iMSIvPjwvZz48L2c+PC9zdmc+')] opacity-50"></div>
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwZWE1ZTkiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PGNpcmNsZSBjeD0iNDAiIGN5PSI0MCIgcj0iMSIvPjwvZz48L2c+PC9zdmc+')] opacity-80"></div>
 
       {/* Decorative blobs */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-chamber-200/20 to-sky-200/20 rounded-full blur-3xl"></div>
@@ -45,7 +45,7 @@ function LoginScreen({ onLogin }) {
               </div>
             </div>
             <h1 className="text-3xl font-bold text-slate-800 tracking-tight ">Chamber</h1>
-            <p className="text-slate-400 mt-6 text-xl font-medium">infinite chatting</p>
+            <p className="text-slate-400 mt-6 text-xl font-medium font-bold">infinite chatting</p>
           </div>
 
           {/* Form */}
@@ -123,7 +123,7 @@ function LoginScreen({ onLogin }) {
               <span className="relative z-10 flex items-center justify-center gap-1">
                 Join Chat
                 <svg
-                  className={`w-4 h-4 transition-transform duration-300 ${
+                  className={`w-5 h-5 transition-transform duration-300 ${
                     isHovered && name.trim() ? 'translate-x-1' : ''
                   }`}
                   fill="none"
@@ -138,13 +138,13 @@ function LoginScreen({ onLogin }) {
 
           {/* Divider */}
           <div className="flex items-center gap-3 my-8">
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
             <div className="flex gap-1">
-              <div className="w-1 h-1 rounded-full bg-slate-300"></div>
-              <div className="w-1 h-1 rounded-full bg-slate-400"></div>
-              <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+              <div className="w-8 h-1 rounded-full bg-slate-300"></div>
+              <div className="w-8 h-1 rounded-full bg-slate-400"></div>
+              <div className="w-8 h-1 rounded-full bg-slate-300"></div>
             </div>
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
           </div>
 
           {/* Feature list - clean and minimal */}
@@ -155,7 +155,7 @@ function LoginScreen({ onLogin }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <span className="text-sm font-medium">Real-time messaging</span>
+              <span className="text-lg font-medium ">Real-time messaging</span>
             </div>
             <div className="flex items-center gap-3 text-slate-500">
               <div className="w-8 h-8 bg-gradient-to-br from-sky-100 to-sky-200 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -163,7 +163,7 @@ function LoginScreen({ onLogin }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
-              <span className="text-sm font-medium">Private conversations</span>
+              <span className="text-lg font-medium">Private conversations</span>
             </div>
             <div className="flex items-center gap-3 text-slate-500">
               <div className="w-8 h-8 bg-gradient-to-br from-cyan-100 to-cyan-200 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -171,7 +171,7 @@ function LoginScreen({ onLogin }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                 </svg>
               </div>
-              <span className="text-sm font-medium">Organized channels</span>
+              <span className="text-lg font-medium">Organized channels</span>
             </div>
           </div>
         </div>

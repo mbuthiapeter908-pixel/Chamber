@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       minlength: 2,
-      maxlength: 20,
+      maxlength: 30,
     },
     socketId: {
       type: String,
